@@ -27,7 +27,7 @@ def add_item(item_data):
 if __name__ == "__main__":
     # Example: Add a single item
     single_item = {
-        "year": "2019",       # Partition key
+        "year": 2019,       # Partition key
         "title": "Tall Girl"      # Sort key (if your table has one)
     }
     add_item(single_item)
