@@ -38,4 +38,4 @@ def list_dynamodb_values(table_name, attribute_name=None):
 
 # Example usage:
 # List all items
-list_dynamodb_values("Movies")
+list_dynamodb_values("caleb-payn-bucket")
