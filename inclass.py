@@ -31,6 +31,8 @@ if __name__ == "__main__":
     print("DynamoDB Tables:", all_tables)
 '''
 
+import math
+
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
@@ -58,11 +60,45 @@ def list_all_items(table_name, region="us-east-1"):
     except (BotoCoreError, ClientError) as e:
         print(f"Error fetching items: {e}")
         return []
+    
+def mean(list):
+    numberOfItems = len(list)
+    sum = 0
+    for i in list:
+        sum += i
+    return sum / numberOfItems
+
+def median(list):
+    numberOfItems = len(list)
+    list.sort()
+    if (numberOfItems % 2) == 0:
+        # even
+        return mean(list = [list[numberOfItems-math.floor(numberOfItems/2)-1], list[numberOfItems-math.floor(numberOfItems/2)]])
+    else:
+        #odd
+        return list[numberOfItems-math.floor(numberOfItems/2)-1]
+    
+def stddev(list):
+    numberOfItems = len(list)
+    mean_ = mean(list)
+    sum = 0
+    for i in list:
+        sum += math.pow(i-mean_, 2)
+
+    
+    return math.sqrt(sum/numberOfItems)
+
 
 if __name__ == "__main__":
+    '''
     table_name = "CIS3823Spring26"  # Replace with your DynamoDB table name
     all_items = list_all_items(table_name)
 
     print(f"Total items retrieved: {len(all_items)}")
     for item in all_items:
-        print(item)
+        print(item.get('task'))
+    '''
+
+    print(mean(list = [1, 2, 3, 10, 14, 6, 7]))
+    print(median(list = [1, 2, 3, 10, 14, 6, 7]))
+    print(stddev(list = [1, 2, 3, 10, 14, 6, 7]))

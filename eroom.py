@@ -6,7 +6,6 @@ def CipherWorker(encodedString):
     for i in range(24):
         option = ''
         
-        
         for j in encodedString:
             if ord(j)+i > 122:
                 option = option+chr(ord(j)+i-24)
