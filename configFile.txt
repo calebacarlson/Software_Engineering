@@ -1,0 +1,6 @@
+worker queue URL,https://sqs.us-east-1.amazonaws.com/216990846240/caleb-queue
+worker queue region,us-east-1
+worker queue max number of message,
+worker queue wait time / polling interval,0
+worker queue visibility timeout,30
+worker queue max consecutive errors,
