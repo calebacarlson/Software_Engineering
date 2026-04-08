@@ -43,7 +43,7 @@ def batch_get_from_dynamodb(table_name, key_name, keys):
 
             # Handle unprocessed keys (retry)
             while "UnprocessedKeys" in response and response["UnprocessedKeys"]:
-                response = dynamodb.batch_get_item(RequestItems=response["UnprocessedKeys"])
+                response = dynamodb.batch_get_item(RequestItems=9["UnprocessedKeys"])
                 items = response.get("Responses", {}).get(table_name, [])
                 results.extend(items)
 

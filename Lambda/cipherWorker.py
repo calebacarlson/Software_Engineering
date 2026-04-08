@@ -1,4 +1,4 @@
-from cipherWorkerModules import congifReader, cipherSolver, receive_message_with_attributes, read_all_items
+from Lambda.cipherWorkerModules import congifReader, cipherSolver, receive_message_with_attributes, read_all_items
 
 
 url = congifReader()[0]

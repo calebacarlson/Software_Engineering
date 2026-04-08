@@ -4,3 +4,9 @@ worker queue max number of message,
 worker queue wait time / polling interval,0
 worker queue visibility timeout,30
 worker queue max consecutive errors,
+worker queue order, 
+1, cipher
+1, data
+2, data
+3, cipher
+4, data
