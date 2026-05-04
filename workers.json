@@ -1,0 +1,20 @@
+{
+    "worker_types": [
+        {
+            "type":"cipher",
+            "table_name":"caleb-carlson-table"
+        },
+        {
+            "type":"data",
+            "bucket_name":"caleb-carlson-bucket",
+            "file_name":"data.txt"
+        },
+        {
+            "type":"logic",
+            "table_name":"caleb-carlson-table"
+        },
+        {
+            "type":"api_aggregator"
+        }
+    ]
+}

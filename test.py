@@ -1,61 +1,51 @@
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
-def read_messages_from_sqs(queue_url, max_messages=10, wait_time=5, visibility_timeout=30):
+def get_all_items_from_dynamodb(table_name, region_name="us-east-1"):
     """
-    Reads messages from an AWS SQS queue.
-
-    :param queue_url: The full URL of the SQS queue.
-    :param max_messages: Max number of messages to retrieve (1–10).
-    :param wait_time: Long polling wait time in seconds (0–20).
-    :param visibility_timeout: Time in seconds the message is hidden after being read.
+    Retrieve all items from a DynamoDB table.
+    
+    Args:
+        table_name (str): Name of the DynamoDB table.
+        region_name (str): AWS region where the table is hosted.
+    
+    Returns:
+        list: A list of all items in the table.
+    
+    Raises:
+        ValueError: If table_name is empty.
+        RuntimeError: If AWS request fails.
     """
-    # Create SQS client
-    sqs = boto3.client("sqs")
+    if not table_name or not isinstance(table_name, str):
+        raise ValueError("Table name must be a non-empty string.")
 
+    # Create DynamoDB resource
+    dynamodb = boto3.resource("dynamodb", region_name=region_name)
+    table = dynamodb.Table(table_name)
+
+    items = []
     try:
-        # Receive messages
-        response = sqs.receive_message(
-            QueueUrl=queue_url,
-            MaxNumberOfMessages=max_messages,
-            WaitTimeSeconds=wait_time,
-            VisibilityTimeout=visibility_timeout,
-            AttributeNames=["All"]
-        )
+        # Initial scan
+        response = table.scan()
+        items.extend(response.get("Items", []))
 
-        attributes = response.get("Attributes", {})
-        print("Queue Attributes:")
-        for key, value in attributes.items():
-            print(f"  {key}: {value}")
+        # Continue scanning if there are more pages
+        while "LastEvaluatedKey" in response:
+            response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+            items.extend(response.get("Items", []))
 
-        messages = response.get("Messages", [])
-        if not messages:
-            print("No messages available in the queue.")
-            return
-        
-        for msg in messages:
-            print(f"Message ID: {msg['MessageId']}")
-            print(f"Body: {msg['Body']}")
-            print("-" * 40)
-            ''''''
-            # Process the message here
-            # Example: store in DB, trigger workflow, etc.
-            # Delete message after successful processing
-            sqs.delete_message(
-                QueueUrl=queue_url,
-                ReceiptHandle=msg["ReceiptHandle"]
-            )
-            print(f"Deleted message {msg['MessageId']} from queue.")
     except (BotoCoreError, ClientError) as e:
-        print(f"Error reading from SQS: {e}")
+        raise RuntimeError(f"Failed to retrieve items from {table_name}: {e}")
 
+    return items
+
+
+# Example usage:
 if __name__ == "__main__":
-    # Replace with your actual SQS queue URL
-    QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/216990846240/caleb-queue"
-
-    read_messages_from_sqs(
-        queue_url=QUEUE_URL,
-        max_messages=5,
-        wait_time=10,
-        visibility_timeout=30
-    )
+    try:
+        all_items = get_all_items_from_dynamodb("YourTableName", region_name="us-east-1")
+        print(f"Retrieved {len(all_items)} items.")
+        for item in all_items:
+            print(item)
+    except Exception as e:
+        print(f"Error: {e}")

@@ -1,0 +1,11 @@
+worker queue URL,https://sqs.us-east-1.amazonaws.com/216990846240/caleb-queue
+worker queue region,us-east-1
+game #, game-0
+worker queue wait time / polling interval,1
+worker queue visibility timeout,30
+worker queue max consecutive errors,
+worker queue order, 
+1, cipher
+1, data
+2, logic
+3, api_aggregator

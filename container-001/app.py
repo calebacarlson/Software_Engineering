@@ -1,8 +1,22 @@
 import boto3
-
+from flask import Flask, jsonify
 from boto3.dynamodb.conditions import Attr
 
-def all_games(table, name, sort_key_value):
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "<h1>the orchestrator sends messages to the workers queue (caleb-carlson-cipher, caleb-carlson-data, caleb-carlson-logic and caleb-carlson-api-aggregator).The queue messages needs to be formatted as such (caleb-carlson-cipher & caleb-carlson-logic: table-name on first line game-# on second) the table I use is named caleb-carlson table. (caleb-carlson-data: bucket-name on first line file-name on second and game-# on the third line) The bucket I use is named caleb-carlson-bucket and it has a data.txt file with numbers on each line. (caleb-carlson-api-aggregator: first line has game-#) Once the workers are done they will send the results to a table named caleb-carlson-result. This web server pulls information from that table</h1>"
+
+@app.route("/all_games")
+def all_games_route():
+    return clean_format(all_games())
+
+@app.route("/one_game/<game>")
+def one_game_route(game):
+    return clean_format(one_game(game))
+
+def all_games(name="worker-type", sort_key_value="game-as-a-whole", table="caleb-carlson-result"):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(table)
 
@@ -14,7 +28,7 @@ def all_games(table, name, sort_key_value):
     print(f"Found {len(items)} items:", items)
     return items
 
-def one_game(table_name, partition_key_name, partition_key_value):
+def one_game(partition_key_value, partition_key_name="game-#", table_name="caleb-carlson-result"):
 
     # Initialize DynamoDB resource
     dynamodb = boto3.resource('dynamodb')
@@ -49,13 +63,6 @@ def clean_format(json):
         clean_str = clean_str+"Game number is "+game_num+"\nObject is "+worker_type+"\nStatus is "+status+"\nAnd finally result is "+result+"\n\n"
     return clean_str
 
-
-
-
-all_games_results = all_games("caleb-carlson-result","worker-type","game-as-a-whole")
-game = "test-1"
-one_games_results = one_game("caleb-carlson-result","game-#",game)
-
-print(clean_format(all_games_results))
-print(clean_format(one_games_results))
-
+if __name__ == "__main__":
+    # Bind to 0.0.0.0 so it works inside Docker
+    app.run(host="0.0.0.0", port=3000)
