@@ -1,51 +1,49 @@
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+from flask import Flask, request, jsonify
+from boto3.dynamodb.conditions import Attr
 
-def get_all_items_from_dynamodb(table_name, region_name="us-east-1"):
-    """
-    Retrieve all items from a DynamoDB table.
-    
-    Args:
-        table_name (str): Name of the DynamoDB table.
-        region_name (str): AWS region where the table is hosted.
-    
-    Returns:
-        list: A list of all items in the table.
-    
-    Raises:
-        ValueError: If table_name is empty.
-        RuntimeError: If AWS request fails.
-    """
-    if not table_name or not isinstance(table_name, str):
-        raise ValueError("Table name must be a non-empty string.")
+app = Flask(__name__)
 
-    # Create DynamoDB resource
-    dynamodb = boto3.resource("dynamodb", region_name=region_name)
-    table = dynamodb.Table(table_name)
+@app.route('/')
+def home():
 
-    items = []
-    try:
-        # Initial scan
-        response = table.scan()
-        items.extend(response.get("Items", []))
+    name = request.args.get('name', 'Guest')
+    return jsonify(clean_format(all_games()))
+    return jsonify({
+        "message": f"goodBye, {name}! Your GET request was received.",
+        "method": request.method,
+        "params": request.args
+    })
 
-        # Continue scanning if there are more pages
-        while "LastEvaluatedKey" in response:
-            response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
-            items.extend(response.get("Items", []))
+def all_games(name="worker-type", sort_key_value="game-as-a-whole", table="caleb-carlson-result"):
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(table)
 
-    except (BotoCoreError, ClientError) as e:
-        raise RuntimeError(f"Failed to retrieve items from {table_name}: {e}")
 
+    response = table.scan(
+        FilterExpression=Attr(name).eq(sort_key_value)
+    )
+    items = response.get('Items', [])
+    print(f"Found {len(items)} items:", items)
     return items
 
+def clean_format(json):
+    clean_str = ""
+    for i in range(len(json)):
+        result = json[i]["result"]
+        game_num = json[i]["game-#"]
+        status = json[i]["status"]
+        worker_type = json[i]["worker-type"]
 
-# Example usage:
-if __name__ == "__main__":
-    try:
-        all_items = get_all_items_from_dynamodb("YourTableName", region_name="us-east-1")
-        print(f"Retrieved {len(all_items)} items.")
-        for item in all_items:
-            print(item)
-    except Exception as e:
-        print(f"Error: {e}")
+        clean_str = clean_str+"Game number is "+game_num+"\nObject is "+worker_type+"\nStatus is "+status+"\nAnd finally result is "+result+"\n\n"
+    return clean_str
+
+@app.errorhandler(404)
+def not_found(e):
+    """Custom 404 error handler."""
+    return jsonify({"error": "Endpoint not found"}), 404
+
+if __name__ == '__main__':
+
+
+    app.run(host='0.0.0.0', port=5000, debug=True)

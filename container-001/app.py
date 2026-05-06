@@ -10,11 +10,11 @@ def home():
 
 @app.route("/all_games")
 def all_games_route():
-    return clean_format(all_games())
+    return jsonify(clean_format(all_games()))
 
 @app.route("/one_game/<game>")
 def one_game_route(game):
-    return clean_format(one_game(game))
+    return jsonify(clean_format(one_game(game)))
 
 def all_games(name="worker-type", sort_key_value="game-as-a-whole", table="caleb-carlson-result"):
     dynamodb = boto3.resource('dynamodb')

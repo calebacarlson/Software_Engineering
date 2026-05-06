@@ -1,6 +1,7 @@
 import webbrowser
 from boto3.dynamodb.conditions import Attr
 import boto3
+import requests
 
 path = input("which one do you want all-games (1), one-game(2), or default(any other key)")
 
@@ -49,15 +50,24 @@ def clean_format(json):
         clean_str = clean_str+"Game number is "+game_num+"\nObject is "+worker_type+"\nStatus is "+status+"\nAnd finally result is "+result+"\n\n"
     return clean_str
 
+def get_json_from_server(url, params=None):
+
+
+    response = requests.get(url, params=params, timeout=5)
+    response.raise_for_status()  # Raise HTTPError for bad responses (4xx, 5xx)
+    
+    # Parse JSON
+    data = response.json()
+    return data
+
 if (path == "1"):
-    url = "https://3aspume2jt.us-east-1.awsapprunner.com/all_games"
-    print(clean_format(all_games()))
+    url = "https://f9zppimwpe.us-east-1.awsapprunner.com/all_games"
+    print(get_json_from_server(url))
 
 elif (path == "2"):
     game_name = input("whats the name of the game? Ex. test-1, test-2")
-    url = "https://3aspume2jt.us-east-1.awsapprunner.com/one_game/"+game_name
-    print(clean_format(one_game(game_name)))
+    url = "https://f9zppimwpe.us-east-1.awsapprunner.com/one_game/"+game_name
+    print(get_json_from_server(url))
 else:
-    url = "https://3aspume2jt.us-east-1.awsapprunner.com"
+    url = "https://f9zppimwpe.us-east-1.awsapprunner.com"
     webbrowser.open(url)
-
