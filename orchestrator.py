@@ -164,11 +164,15 @@ def wait_until_done(level_list, waitTime_str, game):
             
             
 
-            
+send_sqs_message("{
+  "table_name": "travis-puzzle-table",
+  "item_key": "cipher_003",
+  "task_type": "CIPHER"
+}", "Travis-Cipher-Queue")
 
-URL, region, game, waitTime, visibilityTimeout, maxConsecutiveErrors, worker_order_dict = congifReader()
+"""URL, region, game, waitTime, visibilityTimeout, maxConsecutiveErrors, worker_order_dict = congifReader()
 
-orchestrate_workers(worker_order_dict, game, waitTime)
+orchestrate_workers(worker_order_dict, game, waitTime)"""
 
 
 
